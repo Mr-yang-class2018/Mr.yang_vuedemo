@@ -30,6 +30,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 +   public 
     +   1       干嘛的
     +   2       干嘛的
+    +   3       不干嘛不干嘛
 +   src
     +   assset  静态不打包文件
     +   components  公共组件   
