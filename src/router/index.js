@@ -12,6 +12,7 @@ const Search = () => import("views/search/Search")
 const KeyWords = () => import("views/search/Keywords")
 const Details = () => import('views/details/Details')
 const Login = () => import('views/login/Login')
+const Register = () => import('views/register/Register')
 //确认订单
 const ConfirmOrder = () => import('views/order/ConfirmOrder')
 //订单
@@ -86,22 +87,42 @@ const routes = [
     },
     component: Login
   },
+  {
+    path: '/register/:code',
+    meta: {
+      title: "注册"
+    },
+    component: Register,
+    children:[]
+  },
+  {
+    path:'/area_code',
+    component:()=> import('views/area_code/AreaCode')
+  },
+  {
+    path: '/shortMsg/:data',
+    name: 'shortMsg',
+    meta: {
+      title: "获取短信"
+    },
+    component: () => import('views/register/child/ShortMessage')
+  },
   {//确认订单
-    path:'/confirm_order/:shop', //暂时直接传递商品数据
+    path: '/confirm_order/:shop', //暂时直接传递商品数据
     meta: {
       title: "确认订单"
     },
     component: ConfirmOrder
   },
   {//支付页面 
-    path:"/payment/:order_id",
-    meta:{
-      title:"支付页面"
+    path: "/payment/:order_id",
+    meta: {
+      title: "支付页面"
     },
     component: Payment
   },
   {//订单
-    path:'/Order', //暂时直接传递商品数据
+    path: '/Order', //暂时直接传递商品数据
     meta: {
       title: "订单页面"
     },
@@ -116,13 +137,13 @@ const routers = new Router({
 routers.beforeEach((to, from, next) => {
   // 每次路由在执行的时候，记录一下进入页面的路由地址，后期用于判断 tabbar被重复点击
   store.state.SKnavigation = to.path
-  if(to.path == from.path) return
+  if (to.path == from.path) return
   for (let item in store.state.TabBar) {
     console.log(item);
     store.state.TabBar[item] = false
   }
   if (to.path == '/home' || to.path == '/category' || to.path == '/cart') store.state.TabBar.is_jd_TabBar = true
-  else if (to.path.lastIndexOf('/jx') != -1)  store.state.TabBar.is_jx_TabBar = true
+  else if (to.path.lastIndexOf('/jx') != -1) store.state.TabBar.is_jx_TabBar = true
   next();
 })
 export default routers

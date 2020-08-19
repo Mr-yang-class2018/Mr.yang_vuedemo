@@ -44,7 +44,7 @@
         <span class="left" @click="isPhoneLogin = !isPhoneLogin">
           {{isPhoneLogin?'账号密码登录':'短信验证码登录'}}
         </span>
-        <router-link  class="right" to="/home" tag="span">手机快速注册</router-link>
+        <router-link  class="right" to="/register/0" tag="span">手机快速注册</router-link>
       </p>
       <div class="striping">
         <h4>其他方式</h4>
@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import navBar from "components/common/navbar/NavBar";
+import NavBar from "components/common/navbar/NavBar";
 import {register,land,autoLand} from 'network/user'
 export default {
   name: "Login",
@@ -86,7 +86,7 @@ export default {
     };
   },
   components: {
-    navBar,
+    NavBar,
   },
   computed: {},
   created() {

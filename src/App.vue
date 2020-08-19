@@ -4,7 +4,7 @@
       缓存中会存有数据记录，所以在使用过的时候，会出现数据不进行替换。 
       正常使用中，如果不使用keep-alive,组件在离开的时候会被销毁
     -->
-    <keep-alive :exclude="$store.state.keepExclude">
+    <keep-alive :include="$store.state.keepInclude">
       <router-view />
     </keep-alive>
     <jd-main-tab-bar v-if="is_jd_tabbar"></jd-main-tab-bar>

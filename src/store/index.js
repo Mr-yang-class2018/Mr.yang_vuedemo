@@ -27,7 +27,7 @@ const state = {
   },
   //keep-leave
   keepExclude: 'Details,Cart,Payment,ConfirmOrder,Order',
-  keepInclude: '',
+  keepInclude: 'Home',
   shopCartHistory:{},//在页面渲染的时候，购物车加载的时候取以下默认值，在离开购物车页面的时候，用购物车页面的值，和当前值做对比。存在的值。对比后提交数据
   shopCart: {},
   shopCartLength:0,//购物车的数据数量
@@ -42,7 +42,7 @@ const state = {
   ShopCartGoodsNum:0,//记录购物车商品总数量
   shopCartNameArr:[], // Cart2.vue 中需要的变量   --- 不使用element ui  无需考虑这里
   indexArr:{},// Cart2.vue 中需要的变量 ---不使用element ui  无需考虑这里
-  paymentGoods:[]
+  area_code: "86",//国际区号
 }
 const x = new Vuex.Store({
   state,      //状态管理数据
