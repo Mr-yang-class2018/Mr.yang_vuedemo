@@ -34,6 +34,47 @@
       }
     }
   }
+  .warning{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    .dialog{
+      position:absolute;
+      top:30%;
+      left:10%;
+      right:10%;
+      bottom:40%;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: 16px;
+      .content{
+        margin-top:40px;
+        padding:0 30px;
+        text-align: left;
+      }
+      .footer {
+        width: 100%;
+        display: flex;
+        height: 50px;
+        position: absolute;
+        bottom: 0;
+        button {
+          flex: 1;
+          font-size: 18px;
+          outline: none;
+          border: none;
+        }
+        .ok {
+          background-color: red;
+          color: #fff;
+        }
+      }
+    }
+  }
   .dialogBox {
     position: fixed;
     top: 0;
@@ -137,6 +178,19 @@
         </div>
       </div>
     </div>
+    <!-- 手机号可以注册,下面的模态框显示 -->
+    <div v-if="warning" class="warning">
+      <div class="dialog">
+        <div class="content">
+          <p>我们将发送短信/语音验证码至:</p>
+          <p>{{phone}}</p>
+        </div>
+        <div class="footer">
+          <button class="cancel" @click="warningOk">不同意</button>
+          <button class="ok" @click="warningOk('ok')">同意</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -147,11 +201,12 @@ export default {
   name: "",
   data() {
     return {
-      //模态框是否显示
-      show: true,
+      show: true,//模态框是否显示
       phone: "",
       phone_area_code: null, //国际区号
       regTel: true,
+      // area_code:100,
+      warning:false,  //手机号可以注册时，弹出框显示
     };
   },
   components: {
@@ -194,12 +249,20 @@ export default {
           alert("该手机号已被其他账号绑定,30天内不可改绑");
           return;
         }
-        let data = {};
-        data.areaCode = this.areaCode;
-        data.phone = this.phone;
         //如果不是500 ,手机号是未被注册的，跳转短信页面  并传递电话信息过去
-        this.$router.push("/shortMsg/" + JSON.stringify(data));
+        this.warning = true;
+        // this.$router.push("/shortMsg/" + JSON.stringify(data));
       });
+    },
+    warningOk(val){
+      if(val == 'ok'){
+        let data = {};
+        data.areacode = this.area_code;
+        data.telphone = this.phone;
+        console.log(data);
+        this.$router.push("/shortMsg/" + JSON.stringify(data));
+      }
+      this.warning = false;
     },
     checkDialog(val) {
       if (val == "ok") {
@@ -208,14 +271,19 @@ export default {
       }
       this.$router.go(-1);
     },
+   
   },
   created() {
     //创建
     if(this.$route.params.code != 0 ){
       this.show = false;
       // this.$route.path = '/register/0'
-      console.log(this.$route);
+      // 当前页面中的区号，要被传递过来的区号替换
+      // this.area_code = this.$route.params.code
     }
+    // else{
+    //   this.area_code = 86
+    // }
   },
   activated() {
     //激活

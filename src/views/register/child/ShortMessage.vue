@@ -1,109 +1,167 @@
-<style lang="less" scoped>
+<style lang="less">
+/* 把css改成全局的..  不是当前范围使用的*/
+#ShortMessage {
+  .warning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    .dialog {
+      position: absolute;
+      top: 30%;
+      left: 10%;
+      right: 10%;
+      bottom: 40%;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: 16px;
+      .content {
+        margin-top: 40px;
+        padding: 0 30px;
+        text-align: left;
+      }
+      .footer {
+        width: 100%;
+        display: flex;
+        height: 50px;
+        position: absolute;
+        bottom: 0;
+        button {
+          flex: 1;
+          font-size: 18px;
+          outline: none;
+          border: none;
+        }
+        .ok {
+          background-color: red;
+          color: #fff;
+        }
+      }
+    }
+  }
+  .notice {
+    padding: 20px;
+  }
+  .content{
+    padding:20px;
+    input[type=text]:focus{
+      border-color:#DCDFE6;
+    }
+    input[type=text]{
+      border-color:#DCDFE6;
+      outline: none;
+    }
+    .next{
+      margin-top:40px;
+      width: 100%;
+    }
+  }
+}
 </style>
 <template>
-  <div class='ShortMessage'>
-      <h1>发送短信</h1>
+  <div id="ShortMessage">
+    <nav-bar>
+      <div slot="left">
+        <i class="el-icon-arrow-left" @click="warning = true"></i>
+      </div>
+      <div slot="center">京东注册</div>
+    </nav-bar>
+    <div class="notice">
+      <div class="codeImg">{{phoneCode}}</div>
+      <p>我们将以短信或电话的形式将验证码发送给您,请注意接听0575/025/0592/010等开头的电话</p>
+    </div>
+
+    <div class="content">
+      <el-input placeholder="请输入验证码" v-model="regCode" class="input-with-select">
+        <el-button slot="append" @click="getCode" :disabled="isDisabled">{{msg}}</el-button>
+      </el-input>
+
+      <el-button type="danger" round class="next" :disabled="regCode ==''? true:false" @click="next">下一步</el-button>
+    </div>
+
+    <div v-if="warning" class="warning">
+      <div class="dialog">
+        <div class="content">
+          <p>点击"返回"将中断注册,确认返回?</p>
+        </div>
+        <div class="footer">
+          <button class="cancel" @click="warningOk">取消</button>
+          <button class="ok" @click="warningOk('ok')">确认</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-export default {
-  name: 'ShortMessage',
-  data(){
-    return {}
-  },
-  components: {//组件
-  },
-  computed: {//计算
-  },
-  created(){//创建
-  },
-  activated(){//激活
-  },
-  deactivated(){//未激活
-  },
-  mounted(){//渲染
-  },
-  methods: {//事件
-  },
-  watch: {//监听
-  },
-}
-</script>
-<script>
-
 import NavBar from "components/common/navbar/NavBar";
-import {regPhone,get_mobile_prefix} from 'network/user'
+import { getCodeImg } from "network/user";
 export default {
-  name: '',
-  data(){
+  name: "ShortMessage",
+  data() {
     return {
-        region:"",
-        phone:"",
-        phone_area_code:null,//国际区号
-        regTel:true,
-        area_code:"86"
-    }
+      //点击返回按钮的时候，确认框 判断warning
+      warning: false,
+      phoneCode: null,
+      regCode: "",
+      msg: "发送验证码",
+      phone: null,
+      svg: "",
+      isDisabled: false,
+    };
   },
-  components: {//组件
-    NavBar
+  components: {
+    //组件
+    NavBar,
   },
-  watch: {//监听
-    phone(val){
-        let pattern =/^(13|14|15|17|18)[0-9]{9}$/;
-        this.regTel = !pattern.test(val)
-    },
-    area_code(){
-      console.log
-    }
+  computed: {
+    //计算
   },
-  methods: {//事件
-    changeRegion(){},
-    next(){
-        var data={telphone:this.phone}
-        regPhone(data).then(res=>{
-            console.log(res);
-            // res.code == 500 代表用于已经注册 
-            if(res.code == 500){
-              //把用户注册的时间提取出来。转换成时间格式  2020-06-26T06:42:43.000Z
-              let createTime = new Date(res.data.createtime)
-              let newDate = new Date()
-              //Difference  差值毫秒数
-              //   new Date().getTime()  获取当前时间到1970年的毫秒值
-              let Difference = newDate.getTime() - createTime.getTime();
-              if( Difference > 30*24*60*60*1000){ 
-                //注册时间大于3天  跳转页面  并传递用户数据过去
-                this.$router.push('/registered/'+JSON.stringify(res.data))
-                return
-              }
-              alert("该手机号已被其他账号绑定,30天内不可改绑")
-              return
-            }
-            let  data ={};
-            data.areaCode = this.areaCode;
-            data.phone = this.phone;
-            //如果不是500 ,手机号是未被注册的，跳转短信页面  并传递电话信息过去
-            this.$router.push('/shortmeg/'+JSON.stringify(data))
-        })
-    }
+  created() {
+    //在页面创建的时候，先获取到从上个页面传递过来的电话号
+    this.phone = JSON.parse(this.$route.params.data).telphone;
+    this.getCode();
   },
-  created(){//创建
-    get_mobile_prefix().then(res=>{
-      this.phone_area_code = res.data
-      console.log(this.phone_area_code);
-    })
-  },
-  activated(){//激活
-  },
-  deactivated(){//未激活
-  },
-  mounted(){//渲染
-  },
-  filters:{
-      regPhone(val){
-          let pattern = /^0?(13|14|15|17|18)[0-9]{9}$/;
-          return pattern.test(val)
+  methods: {
+    //事件
+    warningOk(val) {
+      if (val == "ok") {
+        this.$router.go(-1);
       }
-  }
-}
+      this.warning = false;
+    },
+    getCode() {
+      this.isDisabled = true;
+      getCodeImg({
+        telphone: this.phone,
+      }).then((res) => {
+        console.log(res);
+        if (res.code != 200) return;
+        this.phoneCode = res.str;
+      });
+      this.timeout();
+      this.msg = "重新发送(60)";
+    },
+    //创建定时器
+    timeout() {
+      let num = 60;
+      let timer = setInterval(() => {
+        num--;
+        this.msg = "重新发送(" + num + ")";
+        if (num == 0) {
+          this.msg = "发送验证码";
+          clearInterval(timer);
+          this.isDisabled = false;
+        }
+      }, 1000);
+    },
+    next(){
+      if(this.regCode != this.phoneCode) return 
+      this.$router.push('/setpwd/'+this.$route.params.data)
+    }
+  },
+};
 </script>

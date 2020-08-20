@@ -70,7 +70,7 @@
 
 <script>
 import NavBar from "components/common/navbar/NavBar";
-import {register,land,autoLand} from 'network/user'
+import {land,autoLand} from 'network/user'
 export default {
   name: "Login",
   data() {
@@ -90,12 +90,7 @@ export default {
   },
   computed: {},
   created() {
-    register({
-      telphone:"13112345688",
-      password:"1234567",
-    }).then(res=>{
-      console.log(res);
-    })
+    
     land({//account 用户登录
       actionKey:"account", 
       username:"Mr.yang",

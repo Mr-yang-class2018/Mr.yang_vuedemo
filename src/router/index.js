@@ -107,6 +107,14 @@ const routes = [
     },
     component: () => import('views/register/child/ShortMessage')
   },
+  {
+    path: '/setpwd/:data',
+    name: 'setpwd',
+    meta: {
+      title: "设置密码"
+    },
+    component: () => import('views/register/child/SetPwd')
+  },
   {//确认订单
     path: '/confirm_order/:shop', //暂时直接传递商品数据
     meta: {

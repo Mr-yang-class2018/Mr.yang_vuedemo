@@ -38,6 +38,16 @@ export function regPhone(params){
         params
     })
 }
+
+//获取手机验证码
+export function getCodeImg(params){
+    return request({
+        url:'/vuedemo/get_code_img',
+        params
+    })
+}
+
+
 //获取国际区号
 
 export function get_mobile_prefix(){
