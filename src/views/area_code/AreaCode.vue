@@ -74,7 +74,7 @@ export default {
         this.$store.commit(AREA_CODE_BACK,val)
       }else{
         //从那个页面来的?    返回的时候 如果是-1   --->login   0 ---->register  
-        if(this.$store.state.routerHistory == '/register'){
+        if(this.$store.state.areacodeHistory == '/register'){
           this.$store.commit(AREA_CODE_BACK,0)
           return 
         }

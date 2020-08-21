@@ -80,6 +80,7 @@ export default {
         console.log(data);
       //向服务器提交请求
       register(data).then((res) => {
+        console.log(res);
         if(res.code != 200 ) return console.log('网络连接错误/数据库连接有误');
         this.$router.push('/login')
       });

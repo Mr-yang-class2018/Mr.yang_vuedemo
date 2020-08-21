@@ -1,13 +1,17 @@
 <template>
   <div id="home">
-    <nav-bar class="home-nav-bar" >
-      <div slot="left" v-on:click="toCategory">分类</div>
+    <nav-bar class="home-nav-bar">
+      <div slot="left" v-on:click="$store.commit('ROUTERTO','/category')">分类</div>
       <div slot="center">
-        <el-input v-model="input" placeholder="请输入内容" v-on:focus="toKeywords"></el-input>
+        <el-input v-model="input" placeholder="请输入内容" v-on:focus="routerTo('/keywords')"></el-input>
       </div>
-      <div slot="right">登录</div>
+      <div slot="right">
+        <!-- 登录前 -->
+        <span v-if="!$store.state.userInfo" @click="routerTo('/login')">登录</span>
+        <!-- 登录后 -->
+        <span v-else class="el-icon-s-custom" @click="routerTo('/profile')"></span>
+      </div>
     </nav-bar>
-    <hr />
     <scroll
       class="homeContent"
       :probeType="3"
@@ -20,7 +24,7 @@
       <home-rotation :cbanners="banners"></home-rotation>
       <hr />
       <!-- 功能视图 -->
-      <home-feature :cfeature="feature" @cfeatureAll='toFeatureAll'></home-feature>
+      <home-feature :cfeature="feature" @cfeatureAll="routerTo('/home/feature')"></home-feature>
       <hr />
       <div>
         <button style="width:100%" @click="changeDirection">改变商品数据排列</button>
@@ -55,10 +59,13 @@ import HomeFeature from "./childComp/HomeFeature";
 // import {getHomeBanner} from "network/home"
 import { debounce } from "common/utils";
 //引入其他文件
+import { ROUTERTO,SET_USERINFO } from "store/mutation-types";
+
 //引入网络请求模块部分组件/方法
-import { getHomeBanner, getFeature} from "network/home";
+import { getHomeBanner, getFeature } from "network/home";
 //取商品数据
-import { getGoods} from "network/goods";
+import { getGoods } from "network/goods";
+import { autoLand } from "network/user";
 export default {
   name: "Home",
   data() {
@@ -89,11 +96,12 @@ export default {
         like: "", //模糊查询
         order: {
           // c2_id: "UtoD",
-          // money_now: "DtoU", 
+          // money_now: "DtoU",
         },
         minMoney: 0,
-        maxMoney: 0, 
-        exact: {//精确查找
+        maxMoney: 0,
+        exact: {
+          //精确查找
         },
       },
     };
@@ -113,11 +121,17 @@ export default {
     this.getFeature(1);
     this.getGoodsMax("recommend");
     this.getGoodsMax("news");
-    this.getShopCart(this.$store.state.userInfo.id);
+
+    if (!this.$store.state.userInfo) {
+      this.auto_code();
+    }
+    // if (this.$store.state.userInfo) {
+    //   this.getShopCart(this.$store.state.userInfo.id);
+    // }
   },
   activated() {
     //在组件激活的时候，调整滚动条的位置。
-    this.$refs.homeScrollCom.scroll.scrollTo(0 , this.saveY , 0);
+    this.$refs.homeScrollCom.scroll.scrollTo(0, this.saveY, 0);
     this.$refs.homeScrollCom.scrollTo1(0, this.saveY, 0);
     this.$refs.homeScrollCom.refreshScroll();
   },
@@ -166,9 +180,9 @@ export default {
     getGoodsMax(type) {
       // let page = this.goods[type].page + 1;
       let data = {
-        page:this.goods[type].page + 1,
-        pagesize:10
-      }
+        page: this.goods[type].page + 1,
+        pagesize: 10,
+      };
       getGoods(data).then((res) => {
         this.goods[type].page += 1;
         this.goods[type].list.push(...res.data);
@@ -186,17 +200,9 @@ export default {
     tabClick(type) {
       this.tabCurrentType = type;
     },
-    //跳转category页面
-    toCategory() {
-      this.$router.push("/category");
-    },
-    //跳转关键字页面
-    toKeywords() {
-      this.$router.push("/keywords");
-    },
-    //点击功能视图的全部，执行的跳转事件
-    toFeatureAll(){
-      this.$router.push('/home/feature')
+    //路由跳转
+    routerTo(path) {
+      this.$store.commit(ROUTERTO, path);
     },
     //切换功能视图横纵向展示事件
     changeDirection() {
@@ -204,9 +210,22 @@ export default {
     },
     //获取购物车数据，调用vuex中actions的数据
     getShopCart(data) {
-      if(data != "" && data != null && data != undefined){
+      if (data != "" && data != null && data != undefined) {
         this.$store.dispatch("getShopCart", data);
-      }  
+      }
+    },
+    //默认进入页面的时候。都是从首页进入。
+    auto_code() {
+      let path = window.location.origin + "/jd";
+      let autocode = window.localStorage.getItem(path);
+      autoLand({
+        autocode:autocode 
+      }).then((res) => {
+        console.log(res);
+        if (res.code != 200) return;
+        this.$store.commit(SET_USERINFO,res)
+        this.getShopCart(res.data.user.id);
+      });
     },
   },
   mounted() {
@@ -218,6 +237,12 @@ export default {
       // this.$refs.homeScrollCom.refresh(); // this.$refs.homeScrollCom   =>> 没找到 refresh方法()
       refresh();
     });
+  },
+  //当离开页面的时候
+  beforeRouteLeave(to, from, next) {
+    //如果去的页面时login 页面。 则记录页面
+    if (to.path == "/login") this.$store.state.loginHistory = from.path;
+    next();
   },
   filters: {
     changePrice: (data, str) => {

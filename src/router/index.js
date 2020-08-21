@@ -21,7 +21,7 @@ const Order = () => import('views/order/Order')
 const Payment = () => import('views/order/Payment')
 const routes = [
   {
-    path: '',
+    path:'',
     redirect: "/home"
   },
   {
@@ -150,7 +150,7 @@ routers.beforeEach((to, from, next) => {
     console.log(item);
     store.state.TabBar[item] = false
   }
-  if (to.path == '/home' || to.path == '/category' || to.path == '/cart') store.state.TabBar.is_jd_TabBar = true
+  if (to.path == '/home' || to.path == '/category' || to.path == '/cart' || to.path == '/profile') store.state.TabBar.is_jd_TabBar = true
   else if (to.path.lastIndexOf('/jx') != -1) store.state.TabBar.is_jx_TabBar = true
   next();
 })

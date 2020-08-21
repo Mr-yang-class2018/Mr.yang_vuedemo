@@ -11,7 +11,12 @@ export const BACK = 'BACK'
 export const ROUTERTO = 'ROUTERTO'
 //国际区号返回
 export const AREA_CODE_BACK = 'AREA_CODE_BACK'
+//自动登录
+export const AOTU_CODE = 'AOTU_CODE'
 
+//设置 userInfo
+
+export const SET_USERINFO = 'SET_USERINFO'
 
 
 

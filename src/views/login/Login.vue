@@ -2,7 +2,8 @@
   <div id="login">
     <nav-bar>
       <div slot="left">
-        <router-link to="/home" class="el-icon-arrow-left" tag="i"></router-link>
+        <!--在login登陆页面  返回的时候，不能使用-1进行返回-->
+        <i class="el-icon-arrow-left" @click="$router.push($store.state.loginHistory)"></i>
       </div>
       <div slot="center">京东登录注册</div>
     </nav-bar>
@@ -10,13 +11,11 @@
     <div class="bigBox">
       <div v-if="isPhoneLogin">
         <div class="inputBox">
-          <div class="inputBox">
-            <router-link to="/area_code" tag="span">
-              {{area_code}}
-              <span class="el-icon-arrow-down"></span>
-            </router-link>
-            <el-input placeholder="请输入手机号" v-model="phone" clearable></el-input>
-          </div>
+          <router-link to="/area_code" tag="span">
+            {{"+"+area_code}}
+            <span class="el-icon-arrow-down"></span>
+          </router-link>
+          <el-input placeholder="请输入手机号" v-model="phone" clearable></el-input>
         </div>
         <div class="inputBox">
           <el-input
@@ -70,7 +69,8 @@
 
 <script>
 import NavBar from "components/common/navbar/NavBar";
-import { land, autoLand } from "network/user";
+import { land } from "network/user";
+// import { land, autoLand } from "network/user";
 export default {
   name: "Login",
   data() {
@@ -92,27 +92,31 @@ export default {
       return this.$store.state.area_code;
     },
   },
-  created() {
-    land({
-      //account 用户登录
-      actionKey: "account",
-      username: "Mr.yang",
-      password: "987654321",
-    }).then((res) => {
-      console.log(res);
-      console.log(res.data.user.autocode);
-      //根据获取到的 登录码，在从新获取下数据
-      autoLand({
-        autocode: res.data.user.autocode,
-      }).then((res) => {
-        console.log(res);
-      });
-    });
-  },
   mounted() {},
   methods: {
     changeRegion() {
       alert("aaa");
+    },
+    userClick() {
+      land({
+        actionKey: "account",
+        username: this.phoneName,
+        password: this.password,
+        // area_code:this.$store.state.area_code
+      }).then((res) => {
+        console.log(res);
+        
+        //渲染用户 可以单独做一个方法。因为后续 自动登录也需要渲染用户信息
+        this.$store.state.userInfo = res.data.user
+        //渲染用户默认配送地址
+        this.$store.state.userInfo.defaddr = res.data.defaddr
+        //跳转指定页面(从哪里来。回哪里去。。。)
+
+        //本地存储存数据
+        this.setLocalStorageAutoCode(res.data.user.autocode)
+
+        this.$router.push(this.$store.state.loginHistory)
+      });
     },
     changeValue() {
       let res = /^1[3|4|5|7|8][0-9]{9}$/;
@@ -131,10 +135,22 @@ export default {
     popUpBox() {
       console.log("暂时不支持一键登录");
     },
+    // 创建本地存储存自动登录码的方法。
+    setLocalStorageAutoCode(val){
+      console.log(window.location.origin);
+      let key = window.location.origin + '/jd'
+      console.log(key);
+      //存储数据  key = "localhost:8080/jd"  val === JOSN字符串
+      localStorage.setItem(key,val) 
+      // console.log(localStorage);
+    },
   },
-  beforeRouteLeave (to, from, next) {
-    if(to.path == '/area_code') this.$store.state.routerHistory = from.path
-    next()
+  created(){
+  },
+  beforeRouteLeave(to, from, next) {
+    //当页面离开的时候，如果访问的路由时/area_code 则记录当前路由地址
+    if (to.path == "/area_code") this.$store.state.areacodeHistory = from.path;
+    next();
   },
 };
 </script>
@@ -151,16 +167,18 @@ export default {
       border-bottom: 1px solid rgb(223, 223, 223);
       color: black;
       span {
-        flex: 1;
+        min-width: 30%;
+        max-width: 40%;
       }
       .el-input {
-        flex: 4;
+        flex: 1;
       }
       .el-button {
         height: auto;
         color: #e2231a;
         border: none;
-        flex: 1;
+        max-width: 40%;
+        min-width: 30%;
       }
       .el-button.is-disabled {
         color: #c0c4cc;

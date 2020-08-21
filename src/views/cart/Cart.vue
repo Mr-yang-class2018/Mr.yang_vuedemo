@@ -26,7 +26,7 @@
           </el-dropdown>
         </div>
       </nav-bar>
-      <div v-if="!$store.state.userInfo.id" class="shopcart_login_bar">
+      <div v-if="!$store.state.userInfo" class="shopcart_login_bar">
         登录可以同步账号下的购物车信息
         <router-link tag="a" to="/login">登录</router-link>
       </div>
@@ -62,7 +62,7 @@ import Scroll from "components/contents/scroll/Scroll";
 import CartTabBar from "./childComp/CartTabBar";
 import CartGoods from "./childComp/CartGoods";
 
-import {UpdataShopCart} from 'network/shopCart'
+import { UpdataShopCart } from "network/shopCart";
 export default {
   name: "Cart",
   data() {
@@ -71,8 +71,13 @@ export default {
     };
   },
   created() {
+    //看看用户是否登录
+    if(!this.$store.state.userInfo){
+      this.$store.dispatch("autocode")
+    }
+
     //如果用户存在。则网络请求shopCart数据
-    if (this.$store.state.userInfo.id && this.shopCartLength == 0) {
+    if (this.$store.state.userInfo && this.shopCartLength == 0) {
       // this.getShopCart();
       this.$store.dispatch("getShopCart", this.$store.state.userInfo.id);
     }
@@ -90,8 +95,10 @@ export default {
   //   next();
   // },
   beforeRouteLeave(to, from, next) {
+    //如果去的页面时login 页面。 则记录页面
+    if (to.path == "/login") this.$store.state.loginHistory = from.path;
     //离开cart页面的时候，修改购物车数据
-    this.upDateShopCart();
+    if(this.$store.state.userInfo) this.upDateShopCart();
     next();
   },
   computed: {
@@ -185,14 +192,15 @@ export default {
             shopCart[i][j].ischeck != shopCartHistory[i][j].ischeck ||
             shopCart[i][j].num != shopCartHistory[i][j].num ||
             shopCart[i][j].norm != shopCartHistory[i][j].norm
-          ) {//就请求修改购物车的接口  把数据传递上去。修改购物车数据
-            let data ={}
-            data.id = shopCart[i][j].id
-            data.num = shopCart[i][j].num
-            data.ischeck = shopCart[i][j].ischeck
-            data.norm = shopCart[i][j].norm
+          ) {
+            //就请求修改购物车的接口  把数据传递上去。修改购物车数据
+            let data = {};
+            data.id = shopCart[i][j].id;
+            data.num = shopCart[i][j].num;
+            data.ischeck = shopCart[i][j].ischeck;
+            data.norm = shopCart[i][j].norm;
             //执行网络请求
-            UpdataShopCart(data)
+            UpdataShopCart(data);
           }
         }
       }

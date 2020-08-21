@@ -280,7 +280,7 @@ export default {
     console.log(to.path);
     //离开页面的时候，需要把 registreDialogShow 重新赋值为true 下次打开页面的时候，协议显示
     this.$store.state.registreDialogShow = true    
-    if(to.path == '/area_code') this.$store.state.routerHistory = from.path
+    if(to.path == '/area_code') this.$store.state.areacodeHistory = from.path
     next()
   },
   filters: {
