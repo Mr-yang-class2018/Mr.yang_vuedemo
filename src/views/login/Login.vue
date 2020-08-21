@@ -10,11 +10,13 @@
     <div class="bigBox">
       <div v-if="isPhoneLogin">
         <div class="inputBox">
-          <span :v-model="region" @click="changeRegion">
-            {{region}}
-            <span class="el-icon-arrow-down"></span>
-          </span>
-          <el-input placeholder="请输入手机号" :oninput="changeValue()" v-model="phone" clearable></el-input>
+          <div class="inputBox">
+            <router-link to="/area_code" tag="span">
+              {{area_code}}
+              <span class="el-icon-arrow-down"></span>
+            </router-link>
+            <el-input placeholder="请输入手机号" v-model="phone" clearable></el-input>
+          </div>
         </div>
         <div class="inputBox">
           <el-input
@@ -26,7 +28,7 @@
           ></el-input>|
           <el-button :disabled="isCodeDisable">获取验证码</el-button>
         </div>
-        <el-button type="danger"  :disabled="isDisable">登录</el-button>
+        <el-button type="danger" :disabled="isDisable">登录</el-button>
       </div>
       <div v-else>
         <div class="inputBox">
@@ -39,12 +41,10 @@
         <el-button type="danger" @click="userClick" v-if="phoneName && password">登录</el-button>
         <el-button type="danger" v-else disabled>登录</el-button>
       </div>
-      <el-button type="danger" plain @click="popUpBox('暂不支持!','使用此功能，请安装最新版京东APP','warning')">一键登录</el-button>
+      <el-button type="danger" plain @click="popUpBox()">一键登录</el-button>
       <p>
-        <span class="left" @click="isPhoneLogin = !isPhoneLogin">
-          {{isPhoneLogin?'账号密码登录':'短信验证码登录'}}
-        </span>
-        <router-link  class="right" to="/register/0" tag="span">手机快速注册</router-link>
+        <span class="left" @click="isPhoneLogin = !isPhoneLogin">{{isPhoneLogin?'账号密码登录':'短信验证码登录'}}</span>
+        <router-link class="right" to="/register" tag="span">手机快速注册</router-link>
       </p>
       <div class="striping">
         <h4>其他方式</h4>
@@ -70,12 +70,11 @@
 
 <script>
 import NavBar from "components/common/navbar/NavBar";
-import {land,autoLand} from 'network/user'
+import { land, autoLand } from "network/user";
 export default {
   name: "Login",
   data() {
     return {
-      region: "+86",
       phone: "",
       code: "",
       phoneName: "",
@@ -88,24 +87,27 @@ export default {
   components: {
     NavBar,
   },
-  computed: {},
+  computed: {
+    area_code() {
+      return this.$store.state.area_code;
+    },
+  },
   created() {
-    
-    land({//account 用户登录
-      actionKey:"account", 
-      username:"Mr.yang",
-      password:"987654321"
-    }).then(res=>{
+    land({
+      //account 用户登录
+      actionKey: "account",
+      username: "Mr.yang",
+      password: "987654321",
+    }).then((res) => {
       console.log(res);
       console.log(res.data.user.autocode);
       //根据获取到的 登录码，在从新获取下数据
       autoLand({
-        autocode:res.data.user.autocode
-      }).then(res=>{
-        console.log(res)
-      })
-    })
-    
+        autocode: res.data.user.autocode,
+      }).then((res) => {
+        console.log(res);
+      });
+    });
   },
   mounted() {},
   methods: {
@@ -126,20 +128,19 @@ export default {
       }
     },
     // 一键登录点击事件
-    popUpBox(t, m, ty) {
-      this.$notify({
-        title: t,
-        message: m,
-        type: ty,
-      });
+    popUpBox() {
+      console.log("暂时不支持一键登录");
     },
+  },
+  beforeRouteLeave (to, from, next) {
+    if(to.path == '/area_code') this.$store.state.routerHistory = from.path
+    next()
   },
 };
 </script>
 <style lang='less' scoped>
 #login {
   background-color: #fff;
-  padding-top: 50px;
   height: calc(100vh - 50px);
   .bigBox {
     width: 90%;

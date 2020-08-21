@@ -43,6 +43,8 @@ const state = {
   shopCartNameArr:[], // Cart2.vue 中需要的变量   --- 不使用element ui  无需考虑这里
   indexArr:{},// Cart2.vue 中需要的变量 ---不使用element ui  无需考虑这里
   area_code: "86",//国际区号
+  registreDialogShow:true,   //用于控制注册页面 注册协议的显示
+  routerHistory:'/home',   //记录一下离开页面时。的路由地址 ，默认地址为/home
 }
 const x = new Vuex.Store({
   state,      //状态管理数据

@@ -76,4 +76,20 @@ export default {
       })
     } 
   },
+  //用于国际区号页面 回退页面事件
+  [types.AREA_CODE_BACK](state,payload){
+    console.log(payload);
+    if(payload == 0){ // 用于 国际区号页面 返回到 注册页面
+      //参数==0 的时候 国际编号 回到初始值
+      state.area_code = '86'
+    }
+    if(payload > 0){ // 用于国际区号页面 选择地区 后 返回到注册页面
+      state.area_code = payload
+      state.registreDialogShow = false
+    }
+    if(payload < 0 ){
+      console.log('返回到登录');
+    }
+    router.go(-1);
+  }
 }

@@ -88,7 +88,7 @@ const routes = [
     component: Login
   },
   {
-    path: '/register/:code',
+    path: '/register',
     meta: {
       title: "注册"
     },
