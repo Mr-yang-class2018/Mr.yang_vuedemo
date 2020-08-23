@@ -10,9 +10,9 @@
       </nav-bar>
       <div class='address'>
         <div v-if='$store.state.userInfo.defaddr == null'>
-          <button>+ 请添加地址</button>
-        </div>
-        <div v-else class='selectAddr'> defaddr
+          <button @click="$store.commit('ROUTERTO','/newAddr')">+ 请添加地址</button>
+        </div> 
+        <div v-else class='selectAddr' @click="$store.commit('ROUTERTO','/allAddr')">
           <h2>{{'杨孝君'}} <span>{{'18614052505' | changeTel}}</span></h2>
           <div>
             北京市昌平区马池口镇被小营村xxxx
@@ -72,6 +72,9 @@ export default {
     //创建
     //JSON.stringify()  // 把数组/对象类型的数据转换成JSON类型的字符串数据
     // JSON.parse() 方法把字符串数据转换成原来的类型
+    if(!this.$store.state.userInfo){
+      this.$store.commit('ROUTERTO','/home')
+    }
     this.shop = JSON.parse(this.$route.params.shop);
   },
   activated() {
