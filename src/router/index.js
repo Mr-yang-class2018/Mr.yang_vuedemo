@@ -125,14 +125,14 @@ const routes = [
     component: ConfirmOrder
   },
   {//所有地址
-    path: '/allAddr', //暂时直接传递商品数据
-    meta: {
+    path: '/allAddr', 
+    meta:{
       title: "所有地址"
     },
     component: AllAddr
   },
-  {//添加订单
-    path: '/newAddr', //暂时直接传递商品数据
+  {//添加地址  修改配送地址
+    path: '/newAddr/:code',  // 0 新增         >0 修改配送地址
     meta: {
       title: "添加地址"
     },

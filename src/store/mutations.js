@@ -111,8 +111,8 @@ export default {
     console.log(payload);
     state.userInfo = {}
     let path = window.location.origin + '/jd'
+    // this.$store.state.userInfo = res.data.user
     for(let i in payload.data.user){
-      console.log(i);
       state.userInfo[i] = payload.data.user[i]
     }
     state.userInfo.defaddr = payload.data.defaddr

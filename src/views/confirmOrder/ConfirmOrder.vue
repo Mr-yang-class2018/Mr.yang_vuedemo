@@ -10,7 +10,7 @@
       </nav-bar>
       <div class='address'>
         <div v-if='$store.state.userInfo.defaddr == null'>
-          <button @click="$store.commit('ROUTERTO','/newAddr')">+ 请添加地址</button>
+          <button @click="$store.commit('ROUTERTO','/newAddr/0')">+ 请添加地址</button>
         </div> 
         <div v-else class='selectAddr' @click="$store.commit('ROUTERTO','/allAddr')">
           <h2>{{'杨孝君'}} <span>{{'18614052505' | changeTel}}</span></h2>
