@@ -70,7 +70,7 @@
 <script>
 import NavBar from "components/common/navbar/NavBar";
 import { land } from "network/user";
-// import { land, autoLand } from "network/user";
+import {POST_SHOPCART} from "store/mutation-types"
 export default {
   name: "Login",
   data() {
@@ -111,10 +111,11 @@ export default {
         //渲染用户默认配送地址
         this.$store.state.userInfo.defaddr = res.data.defaddr
         //跳转指定页面(从哪里来。回哪里去。。。)
-
         //本地存储存数据
         this.setLocalStorageAutoCode(res.data.user.autocode)
-
+        //获取购物车数据
+        this.$store.commit(POST_SHOPCART,res.data.user.id)
+        //跳转页面
         this.$router.push(this.$store.state.loginHistory)
       });
     },

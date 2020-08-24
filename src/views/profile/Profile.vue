@@ -121,7 +121,8 @@
         ></el-avatar>
         <div class="myname">
           <div v-if="userInfo">
-            <p>用户名:{{userInfo.name}}</p>
+            <p>用户名:{{userInfo.name}} /<span @click='signOut'>退出</span></p>
+            
           </div>
           <div v-else>
             <router-link tag="span" to="/login">登录</router-link>/
@@ -304,6 +305,17 @@ export default {
       }
       this.$store.commit(ROUTERTO, val);
     },
+    //用户退出
+    signOut(){
+      this.$store.state.userInfo = null
+      this.$store.state.shopCart = null
+      this.$store.state.shopCartLength = 0
+      let path = window.location.origin + '/jd'
+      localStorage.setItem(path,'')
+      //console.log(localStorage.aaa); //undefined
+
+      //如果后续我们在进行退出用户后。测试页面时，发现数据没有清空。则在此处添加清空数据的 对应值
+    }
   },
   computed: {
     userInfo() {
