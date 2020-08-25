@@ -46,11 +46,11 @@ export default {
       let path = window.location.origin + "/jd";
       let autocode = window.localStorage.getItem(path);
       autoLand({
-        autocode:autocode 
+        autocode: autocode,
       }).then((res) => {
         console.log(res);
         if (res.code != 200) return;
-        this.$store.commit(SET_USERINFO,res)
+        this.$store.commit(SET_USERINFO, res);
       });
     }
     //延迟请求收货地址， 后期去掉定时器
@@ -71,7 +71,13 @@ export default {
   },
   watch: {},
   components: { navBar },
-  methods: {},
+  methods: {
+    updataDef(val) {
+      console.log(val);
+      this.$store.state.ShoppingAddress = val;
+      this.$router.go(-1)      
+    },
+  },
   computed: {
     userId() {
       return this.$store.state.userInfo.id;

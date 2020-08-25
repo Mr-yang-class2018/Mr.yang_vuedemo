@@ -63,6 +63,8 @@ export default {
             this.$router.push("/profile");
             return;
           }
+          //提交订单成功后。把默认的配送地址取回来。放到购物车页面
+          this.$store.state.ShoppingAddress = this.$store.state.userInfo.defaddr;
           this.$router.push("/payment/" + res.data.order_id);
         });
       }

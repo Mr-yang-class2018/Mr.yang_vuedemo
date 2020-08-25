@@ -202,7 +202,7 @@ import {
   creat_user_address,
   get_user_address,
   update_user_address,
-  delete_user_address
+  delete_user_address,
 } from "network/address";
 export default {
   name: "newAddr",
@@ -212,7 +212,7 @@ export default {
       address: {
         name: "",
         phone: "",
-        nowAddr: ["黑龙江省", "哈尔滨市", "松北新区"], //地址   省市县(区)
+        nowAddr: [], //地址   省市县(区)
         particular: "", //详细地址 (街道/小区)
         tag: "", //标签   家 学校  公司   指定地址
         default: true,
@@ -296,8 +296,7 @@ export default {
               }
               return false;
             });
-            getAreas({cityid:cid[0].cityid}).then((res) => {
-
+            getAreas({ cityid: cid[0].cityid }).then((res) => {
               this.editableTabs[2].content = res.data;
             });
           });
@@ -424,7 +423,8 @@ export default {
         this.address.nowAddr.join(",") + "," + this.address.particular;
       data.takeover_label = this.active != -1 ? this.address.tag : "";
       data.default = this.address.default ? 1 : 0;
-      if (this.code == 0) { // 新增   指定提交字段6
+      if (this.code == 0) {
+        // 新增   指定提交字段6
         creat_user_address(data).then((res) => {
           console.log(res);
           if (res.code != 200)
@@ -436,21 +436,27 @@ export default {
           if (!this.$store.state.configOrderHistory) this.$router.push("/cart");
           this.$router.push(this.$store.state.configOrderHistory);
         });
-      } else {  //修改  指定提交字段7
-        data.address_id  = this.code
-        update_user_address(data).then(res=>{
+      } else {
+        //修改  指定提交字段7
+        data.address_id = this.code;
+        update_user_address(data).then((res) => {
           if (res.code != 200)
             return console.log("添加地址超时/服务器连接失败/或指定字段错误");
           this.$store.state.ShoppingAddress = data;
           if (!this.$store.state.configOrderHistory) this.$router.push("/cart");
           this.$router.push(this.$store.state.configOrderHistory);
-        })
+          //如果修改成功购。我需要判断修改的数据 是否提交了默认地址。如果提交默认地址。则改变现有userInfo的defaddr
+          if(data.default == 1){
+            this.$store.userInfo.defaddr = data
+          }
+        });
       }
     },
     deleteAddr() {
-      delete_user_address({address_id:this.code}).then(res=>{
-        this.$router.go(-1)
-      })
+      delete_user_address({ address_id: this.code }).then(() => {
+        // console.log(res);
+        this.$router.go(-1);
+      });
       console.log(`删除指定ID = ${this.code} 的收货地址`);
     },
   },
