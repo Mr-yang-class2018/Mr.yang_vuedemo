@@ -9,14 +9,12 @@
         <div slot="right"></div>
       </nav-bar>
       <div class='address'>
-        <div v-if='$store.state.userInfo.defaddr == null'>
+        <div v-if='$store.state.ShoppingAddress == null'>
           <button @click="$store.commit('ROUTERTO','/newAddr/0')">+ 请添加地址</button>
         </div> 
         <div v-else class='selectAddr' @click="$store.commit('ROUTERTO','/allAddr')">
-          <h2>{{'杨孝君'}} <span>{{'18614052505' | changeTel}}</span></h2>
-          <div>
-            北京市昌平区马池口镇被小营村xxxx
-          </div> 
+          <h2>{{address.takeover_name}} <span>{{ address.takeover_tel | changeTel}}</span></h2>
+          <p>{{address.takeover_addr}}</p>
         </div>
       </div>
       {{shop}}
@@ -44,6 +42,11 @@ export default {
       },
     };
   },
+  beforeRouteLeave (to, from, next) {
+    console.log(from);
+    this.$store.state.configOrderHistory = from.path
+    next()
+  },
   methods: {
     //事件
     payment() {
@@ -67,6 +70,9 @@ export default {
   },
   computed: {
     //计算
+    address(){
+      return this.$store.state.ShoppingAddress
+    }
   },
   created() {
     //创建
