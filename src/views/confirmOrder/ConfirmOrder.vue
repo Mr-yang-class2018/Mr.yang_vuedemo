@@ -2,7 +2,7 @@
   <div id="confirmOrder">
     <scroll class="scroll">
       <nav-bar>
-        <div slot="left">
+        <div slot="left" @click='$router.go(-1)'>
           <i class="el-icon-arrow-left"></i>
         </div>
         <div slot="center">确认订单</div>
