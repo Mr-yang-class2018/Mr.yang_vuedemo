@@ -83,6 +83,13 @@ const routes = [
     component: Details,
   },
   {
+    path: '/allevaluate/:id',
+    meta: {
+      title: "所有评价"
+    },
+    component:()=> import('views/details/childComp/AllEvaluate'),
+  },
+  {
     path: '/login',
     meta: {
       title: "登录"

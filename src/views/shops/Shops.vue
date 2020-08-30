@@ -39,48 +39,7 @@ export default {
       if (temp.length == 3) temp.pop();
       return temp.join(" ");
     },
-    getDistributionTime() {
-      //获取配送的时间
-      let nowTime  = new Date();
-      // let h = nowTime.getHours();
-      let h = 20;
-      let temp = "";
-      if (this.shopCeatgory == "自营") {//jd自营
-        if (this.aa) {//本地配送  +1
-          if (h >= 0 && h < 11) {
-            temp = `在11:00前下单，预计今天送达`;
-          }
-          if (h > 11 && h < 23) {
-            temp = `在23:00前下单，预计明天( ${this.setDate(nowTime,1)}   )送达`;
-          }
-          if (h >= 23) {
-            temp = `在明天(11:00)前下单,预计明天(${this.setDate(nowTime,1)})17:00前送达`;
-          } 
-        } else {//异地配送  +2
-          if (h >= 0 && h < 11) {
-            temp = `在11:00前下单，预计${this.setWeek(nowTime,3)}(${this.setDate(nowTime,2)})送达`;
-          }
-          if (h > 11 && h < 23) {
-            temp = `在23:00前下单，预计${this.setWeek(nowTime,3)}(${this.setDate(nowTime,3)})送达`;
-          }
-          if (h >= 23) {
-            temp = `在明天(11:00)前下单,预计${this.setWeek(nowTime,3)}(${this.setDate(nowTime,3)})17:00前送达`;
-          }
-        }
-      } else {
-        // 个体
-        if (h >= 0 && h < 11) {
-          temp = `在11:00前下单，预计今天送达`;
-        }
-        if (h > 11 && h < 23) {
-          temp = `在23:00前下单，预计${this.setWeek(nowTime,3)}(${this.setDate(nowTime,3)})送达`;
-        }
-        if (h >= 23) {
-          temp = `在明天(11:00)前下单,预计${this.setWeek(nowTime,3)}(${this.setDate(nowTime,3)})17:00前送达`;
-        }
-      }
-      return temp;
-    },
+    
   },
   created() {
     //创建

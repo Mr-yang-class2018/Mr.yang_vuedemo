@@ -59,13 +59,12 @@ export default {
         user_id: this.$store.state.userInfo.id,
       }).then((res) => {
         console.log(res);
-        this.allAddress = res.data;
+        this.$store.state.allAddress = res.data;
       });
     }, 500);
   },
   data() {
     return {
-      allAddress: null,
       radio: "1",
     };
   },
@@ -82,6 +81,9 @@ export default {
     userId() {
       return this.$store.state.userInfo.id;
     },
+    allAddress(){
+      return this.$store.state.allAddress == null ? [] :this.$store.state.allAddress
+    }
   },
   filters: {
     hiddenPhone(val) {
