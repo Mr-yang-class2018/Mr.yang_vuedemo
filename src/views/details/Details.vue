@@ -89,6 +89,13 @@
   }
 }
 </style>
+<style lang="less">
+#details{
+  .drawerHeight{
+    height:60vh !important; 
+  }
+}
+</style>
 <template>
   <div id="details" v-loading="loading">
     <details-nav-bar ref="detailsNavBar" :title="titleArr"></details-nav-bar>
@@ -115,6 +122,9 @@
         <div class="selected" @click="open('selected')">
           <div class="left">已选</div>
           <div class="right">
+            <span>规格....</span>
+            <span>{{orderSel.order_num}}个</span>
+
             <span class="icon el-icon-more"></span>
           </div>
         </div>
@@ -122,7 +132,7 @@
         <div class="distribution" @click="open('distribution')">
           <div class="left">送至</div>
           <div class="right">
-            <p>{{addr}}</p>
+            <p>{{addr | changeAddr}}</p>
             <p>
               <span v-if="true" title="库存有货则显示">现货</span>
               {{getDistributionTime}}
@@ -156,7 +166,7 @@
       </div>
 
       <!--评价 自定义 一个变量数组 暂时使用 -->
-      <details-evaluate :evaluate="detailsEvaluate" :cDetailsId ='detailsId'></details-evaluate>
+      <details-evaluate :evaluate="detailsEvaluate" :cDetailsId="detailsId"></details-evaluate>
       <!-- 问答 -->
 
       <!-- 体验 -->
@@ -203,31 +213,49 @@
         :withHeader="false"
       >
         <div>
-          <div v-for="(item,index) in selectNorm" :key='index'>
-            <div v-for='(i,j) in item' :key='j'>
+          <div v-for="(item,index) in selectNorm" :key="index">
+            <div v-for="(i,j) in item" :key="j">
               <div>{{j}}</div>
-              <div v-for='(m,n) in i' :key ='n' style='width:90%;height:30px;text-overflow:hidden;overflow:hidden;margin-bottom:10px;text-align:left;background-color:#d4d4d4;line-height:30px;margin-left:5%;border-radius:15px;'>
-                {{m.name}}
-              </div>
+              <div
+                v-for="(m,n) in i"
+                :key="n"
+                style="width:90%;height:30px;text-overflow:hidden;overflow:hidden;margin-bottom:10px;text-align:left;background-color:#d4d4d4;line-height:30px;margin-left:5%;border-radius:15px;"
+              >{{m.name}}</div>
+            </div>
+          </div>
+          <div class="order_num">
+            <div>数量</div>
+            <div>
+              <button @click="order_num--" :disabled="orderSel.order_num <= 1">-</button>
+              <input type="text" v-model="orderSel.order_num" />
+              <button @click="orderSel.order_num++">+</button>
             </div>
           </div>
         </div>
       </el-drawer>
+      <!-- 配送 -->
       <el-drawer
         title="配送至"
         direction="btt"
         :close-on-press-escape="false"
         :visible.sync="distribution"
         :append-to-body="true"
-        custom-class="自定义类名"
+        size='70%'
       >
-
-        <ul style="text-align:left;line-height:20px; font-size:14px;">
-          <li style="padding:10px 0;" v-for="(item,index) in allAddress" :key="index">
+        <ul style="text-align:left;line-height:20px; font-size:14px;padding:0 10px;" v-if="$store.state.userInfo">
+          <li
+            style="padding:10px 0;"
+            v-for="(item,index) in allAddress"
+            :key="index"
+            @click="changeAddr(item.takeover_addr)"
+          >
             <!-- 使用过滤器吧地址进行拼接 -->
             {{ item.takeover_addr | changeAddr}}
           </li>
         </ul>
+        <div v-else>
+          省市县三级列表菜单
+        </div>
       </el-drawer>
       <el-drawer
         title="服务"
@@ -241,7 +269,7 @@
       </el-drawer>
     </scroll>
 
-    <details-tab-bar></details-tab-bar>
+    <details-tab-bar :addshopcart="addShop" :to-add-order="addOrder"></details-tab-bar>
   </div>
 </template>
 
@@ -256,9 +284,10 @@ import DetailsEvaluate from "./childComp/DetailsEvaluate";
 import DetailsTabBar from "./childComp/DetailsTabBar";
 //引入商品数据网络请求
 // import {getgoods,getGoods_id} from 'network/goods'
-import { getGoodsId} from "network/details";
+import { getGoodsId } from "network/details";
 import { get_user_address } from "network/address";
-import { GoodsInfo, ShopInfo ,SelectNorm,Evaluate} from "common/utils";
+import { addShopCart } from "network/shopCart";
+import { GoodsInfo, ShopInfo, SelectNorm, Evaluate } from "common/utils";
 // import { GoodsInfo, ShopInfo} from "common/utils";
 export default {
   name: "Details",
@@ -268,22 +297,26 @@ export default {
       // path: "http://106.12.85.17:8090/public/image",
       titleArr: ["商品", "评价", "详情", "推荐"],
       detailsGoods: {}, //商品详情数据
-      goodsImg: [],     //轮播图数据
-      shopInfo: {},     //商铺数据
-      selectNorm: {},   // 规格数据
-      detailsEvaluate: {},  // 商品评价
+      goodsImg: [], //轮播图数据
+      shopInfo: {}, //商铺数据
+      selectNorm: {}, // 规格数据
+      detailsEvaluate: {}, // 商品评价
       currentIndex: 0,
       saveY: 0,
       tabCenter: null,
-      loading: false,  // 是否加载等待
+      loading: false, // 是否加载等待
       discount: false, //优惠遮罩层，不显示
       selected: false, // 选择遮罩层 不显示
       distribution: false, // 送至遮罩层 不显示
       service: false, //服务遮罩层不显示
-      nowGoods: true,  
+      nowGoods: true,
       shopCategory: "", //商铺是个体还是自营
-      addr: "",           // 在本地存储取到的地址
-      free_freight: 0,    // 是否免运费  0 不免  1 免
+      addr: "", // 在本地存储取到的地址
+      free_freight: 0, // 是否免运费  0 不免  1 免
+      orderSel: {
+        norm: {},
+        order_num: 1,
+      },
     };
   },
   components: {
@@ -364,6 +397,9 @@ export default {
     allAddress() {
       return this.$store.state.allAddress;
     },
+    localPath(){
+      return this.$store.state.localData
+    }
   },
   created() {
     // console.log(this.$router);
@@ -371,12 +407,10 @@ export default {
     // console.log("details被创建");
     this.detailsId = this.$route.params.id;
     this.getGoods(this.detailsId);
-    this.addr =
-      window.localStorage.getItem("jdItem") == null
-        ? "北京 昌平"
-        : window.localStorage.getItem("jdItem");
+    this.getAddr();
+    this.lookLocalStorage();
   },
-  activated() {},
+  watch: {},
   mounted() {
     this.$bus.$on("toDE", (path) => {
       this.isShow = true;
@@ -406,11 +440,14 @@ export default {
         this.shopInfo = new ShopInfo(res.data.shopData);
         console.log(this.detailsGoods);
         // 取规格数据
-        this.selectNorm = new SelectNorm(res.data.norms,res.data.relationGoods)
+        this.selectNorm = new SelectNorm(
+          res.data.norms,
+          res.data.relationGoods
+        );
         // this.getNorm(res.data.norms,res.data.relationGoods)
 
-        //获取评价 
-        this.detailsEvaluate = new Evaluate(res.data.sevaluateDate)
+        //获取评价
+        this.detailsEvaluate = new Evaluate(res.data.sevaluateDate);
         console.log(this.detailsEvaluate);
         //自营 还是个体
 
@@ -451,6 +488,37 @@ export default {
       }
       if (temp.length == 3) temp.pop();
       return temp.join(" ");
+    },
+    changeAddr(val) {
+      //存到本地存储中 ， 存储的数据，不去存截取后的值，直接存原值
+      this.addr = val
+      let data = window.localStorage.getItem(this.localPath);
+      if (data != null) {
+        data = JSON.parse(data);
+      } else {
+        data = {};
+      }
+      data.orderAddr = val;
+      window.localStorage.setItem(this.localPath, JSON.stringify(data));
+      this.distribution = false;
+    },
+    getAddr() {
+      let data = window.localStorage.getItem(this.localPath);
+      if (data != null && data != '') {
+        data = JSON.parse(data);
+        if (data.orderAddr != undefined && data.orderAddr != null &&data.orderAddr != '') {
+          this.addr = data.orderAddr;
+        } else {
+          this.addr = "北京市,北京市,昌平区,";
+          data.orderAddr = "北京市,北京市,昌平区,";
+        } 
+      } else {
+        this.addr = "北京市,北京市,昌平区,";
+        data = {};
+        data.orderAddr = "北京市,北京市,昌平区,";
+      }
+      console.log(this.addr);
+      window.localStorage.setItem(this.localPath, JSON.stringify(data));
     },
     setDate(nowtime = new Date(), val = 1) {
       let calculationTime = new Date(
@@ -504,11 +572,20 @@ export default {
       }
       if (val == "distribution") {
         this.distribution = true;
+        // 点击配送至 ---->如果用户没有登录，应该先让他登录。在获取数据
+        if (!this.$store.state.userInfo) {
+          //打开省市县 地址
+
+          this.$store.state.allAddress = "弹出个选择框-省-市-县";
+          //在弹出框内 的县的位置，点击选择之后。把 省市县的值赋值给  this.$store.state.allAddress
+          //并且  "省,市,县," ==>  ['省','市','县','']
+
+          return;
+        }
         if (this.allAddress == null) {
           get_user_address({
             user_id: this.$store.state.userInfo.id,
           }).then((res) => {
-            console.log(res);
             this.$store.state.allAddress = res.data;
           });
         }
@@ -517,31 +594,113 @@ export default {
         this.service = true;
       }
     },
-    getNorm(norm,relation){
-        this.selectNorm = {}
-        let aaa = {}
-        if(norm.length > 0){  
-            for(let i = 0 ; i <norm.length; i++){
-                if(!aaa[norm[i].ggname]){
-                    aaa[norm[i].ggname] = []
-                }
-                aaa[norm[i].ggname].push(norm[i])
-            }    
+    getNorm(norm, relation) {
+      this.selectNorm = {};
+      let aaa = {};
+      if (norm.length > 0) {
+        for (let i = 0; i < norm.length; i++) {
+          if (!aaa[norm[i].ggname]) {
+            aaa[norm[i].ggname] = [];
+          }
+          aaa[norm[i].ggname].push(norm[i]);
         }
-        this.selectNorm.norm = aaa;
-        let bbb = {}
-        if(relation.length >0 ){
-            for(let i = 0 ; i <relation.length; i++){
-                console.log(bbb)
-                if(!bbb[relation[i].relation_name]){
-                    bbb[relation[i].relation_name] = []
-                }
-                bbb[relation[i].relation_name].push(relation[i])
-            }   
+      }
+      this.selectNorm.norm = aaa;
+      let bbb = {};
+      if (relation.length > 0) {
+        for (let i = 0; i < relation.length; i++) {
+          console.log(bbb);
+          if (!bbb[relation[i].relation_name]) {
+            bbb[relation[i].relation_name] = [];
+          }
+          bbb[relation[i].relation_name].push(relation[i]);
         }
-        this.selectNorm.relation = bbb
-        console.log(this.selectNorm);
-    }
+      }
+      this.selectNorm.relation = bbb;
+      console.log(this.selectNorm);
+    },
+    //添加购物车
+    addShop() {
+      let shopCart = {};
+      shopCart.goods_id = this.detailsId;
+      shopCart.user_id = this.$store.state.userInfo
+        ? this.$store.state.userInfo.id
+        : "";
+      shopCart.num = this.orderSel.order_num;
+      //需要计算取值
+      shopCart.norm = JSON.stringify(this.orderSel.norm); //传递json串
+      shopCart.takeover_addr = this.addr;
+
+      if (this.$store.state.userInfo) {
+        //请求购物车
+        addShopCart(shopCart).then((res) => {
+          
+          if(res.code != 200) return console.log(res.msg);
+
+          //重新获取购物车数据
+          this.$store.dispatch('getShopCart', this.$store.state.userInfo.id)
+        });
+      } else {
+        //没有用户的情况下。也能添加购物车
+        console.log("用户不存在");
+        let data = window.localStorage.getItem(this.localPath);
+        console.log(data);
+        if (data != null && data != "") {
+          data = JSON.parse(data);
+          let temp = 0;
+          if (data.shopCart) {
+            for (let i = 0; i < data.shopCart.length; i++) {
+              if (
+                data.shopCart[i].goods_id == shopCart.goods_id &&
+                data.shopCart[i].norm == shopCart.norm &&
+                data.shopCart[i].takeover_addr == shopCart.takeover_addr
+              ) {
+                data.shopCart[i].num += shopCart.num * 1;
+                break;
+                // continue;
+              }
+              temp++;
+              console.log(temp);
+            }
+            if (temp == data.shopCart.length) {
+              data.shopCart.push(shopCart);
+            }
+          } else {
+            data.shopCart = [];
+            data.shopCart.push(shopCart);
+          }
+        } else {
+          data = {};
+          data.shopCart = [];
+          data.shopCart.push(shopCart);
+        }
+        this.calculationStorageShopNum(data.shopCart);
+        //。。。shopCart是否存在.存在 添加数据。不存在创建数据
+        window.localStorage.setItem(this.localPath, JSON.stringify(data));
+      }
+    },
+    addOrder() {
+      console.log("执行了添加订单");
+    },
+    //查看本地存储是否存有购物车数据
+    lookLocalStorage() {
+      if (!this.$store.state.userInfo) {
+        console.log("a");
+        let data = window.localStorage.getItem(this.localPath);
+        console.log(data);
+        if (data == null || data == "") return;
+        data = JSON.parse(data)
+        if (!data.shopCart) return;
+        this.calculationStorageShopNum(data.shopCart);
+      }
+    },
+    //计算用户没有登录的时候购物车的数量
+    calculationStorageShopNum(arr) {
+      this.$store.state.shopCartLength = 0;
+      arr.forEach((item) => {
+        this.$store.state.shopCartLength += item.num * 1;
+      });
+    },
   },
   filters: {
     changePrice(val, str = "$") {
@@ -552,7 +711,18 @@ export default {
       return val;
     },
     changeAddr(val) {
-      let addr = val.split(",").join("");
+      //去掉重复值的操作。。。。。
+      console.log(val);
+      let addr = val.split(",")
+      console.log(addr);
+      let temp = [];
+      for(let i = 0 ; i < addr.length ; i++){
+        if(temp.indexOf(addr[i]) == -1){
+          temp.push(addr[i])
+        }
+        console.log(temp);
+      }
+      addr = temp.join("");
       return addr;
     },
   },

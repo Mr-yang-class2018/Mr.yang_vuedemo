@@ -43,6 +43,7 @@
       .user {
         flex: 2;
         font-weight: bold;
+        margin-left:10px;
       }
       .evaluateTime {
         flex: 1;

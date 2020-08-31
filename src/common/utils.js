@@ -73,12 +73,11 @@ export class SelectNorm {
 
 export class Evaluate {
     constructor(evaluate) {
-        console.log(evaluate);
         for (let i = 0; i < evaluate.length; i++) {
             this[i] = {};
             //用户名
-            if(evaluate[i].anonymous == 0){
-                let arr = evaluate[i].username.split('')
+            if(evaluate[i].anonymous == 1){
+                let arr = evaluate[i].username.split('') // z h a n g y a g e
                 let name = ""
                 for(let j = 0 ; j < arr.length; j ++){
                     if(j>0 && j < arr.length-1)
@@ -93,7 +92,8 @@ export class Evaluate {
             this[i].headPortrait = evaluate[i].headImg;
             //图片
             let imgArr= evaluate[i].evaluationImg.split(',')
-            this[i].evaluationImg = imgArr.concat(imgArr,imgArr,imgArr,imgArr);
+            // this[i].evaluationImg = imgArr.concat(imgArr,imgArr,imgArr,imgArr);
+            this[i].evaluationImg = imgArr;
             //时间
             let time = new Date(evaluate[i].evaluationTime);
             this[i].time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
@@ -101,8 +101,6 @@ export class Evaluate {
             this[i].val = evaluate[i].additional;
             //好评度
             this[i].highpraise = evaluate[i].Highpraise;
-            //是否匿名
-            this[i].anonymous = evaluate[i].anonymous;
         }
     }
 }

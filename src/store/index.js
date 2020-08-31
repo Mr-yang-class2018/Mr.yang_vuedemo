@@ -9,6 +9,7 @@ Vue.use(Vuex)
 
 const state = {
   urlPath: 'http://106.12.85.17:8090/public/image',
+  localData:'JD_entry_data', //用于保存本地存储数据的 key
   TabBar: {
     is_jd_TabBar: true,
     is_jx_TabBar: false,
