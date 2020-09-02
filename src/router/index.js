@@ -177,11 +177,20 @@ routers.beforeEach((to, from, next) => {
   store.state.SKnavigation = to.path
   if (to.path == from.path) return
   for (let item in store.state.TabBar) {
-    console.log(item);
+    // console.log(item);
     store.state.TabBar[item] = false
   }
   if (to.path == '/home' || to.path == '/category' || to.path == '/cart' || to.path == '/profile') store.state.TabBar.is_jd_TabBar = true
   else if (to.path.lastIndexOf('/jx') != -1) store.state.TabBar.is_jx_TabBar = true
+
+  //如果你即将访问的路由地址 包含 confirm_order 的话。我就记录一下 来的路由地址
+  // if(to.path.split('/')[1] == 'confirm_order'){store.state.areacodeHistory = from.path}
+    
+  if(to.path.indexOf('/confirm_order') != -1) {
+    store.state.areacodeHistory = from.path
+  }
+
+
   next();
 })
 export default routers

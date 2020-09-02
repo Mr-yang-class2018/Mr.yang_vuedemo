@@ -36,7 +36,7 @@ export default {
     this.order_id = this.$route.params.order_id;
     console.log(this.$route);
     console.log(this.order_id);
-    this.getPayMentOrder();
+    this.getPayMentOrder(this.order_id);
   },
   activated() {
     //激活
