@@ -471,7 +471,6 @@ export default {
         // 获取轮播数据
         this.goodsImg = res.data.goodsData.img_detalis_list;
         // 商品数据
-
         this.detailsGoods = new GoodsInfo(
           res.data.goodsData,
           res.data.shopData
@@ -485,10 +484,8 @@ export default {
           res.data.relationGoods
         );
         // this.getNorm(res.data.norms,res.data.relationGoods)
-
         //获取评价
         this.detailsEvaluate = new Evaluate(res.data.sevaluateDate);
-
         //获取立即购买需要提交的数据信息
         this.confirmData = new orderConfirmData(
           res.data.goodsData,
@@ -752,9 +749,23 @@ export default {
       // 确认console.log('被执行');
       this.confirmData.num = this.orderSel.order_num;
       //需要计算取值
-      this.confirmData.norm = JSON.stringify(this.orderSel.norm); 
+      this.confirmData.norm = JSON.stringify(this.orderSel.norm);
       this.confirmData.takeover_addr = this.addr;
       this.$store.state.payMentData = [this.confirmData];
+      //把 payMentData 的数据变成json数据并 提交到本地存储中
+
+      //做存储   把数据存储到本地存储中
+
+      let data = window.localStorage.getItem(this.$store.state.localData);
+      data =
+        data != undefined && data != null && data != ""
+          ? JSON.parse(data)
+          : {};
+      //为 本地存储中添加 payMentData ， 值为提交到confirmOrder中的数据
+      data.payMentData = this.$store.state.payMentData
+      //存储
+      window.localStorage.setItem(this.$store.state.localData,JSON.stringify(data))
+
       this.$router.push("/confirm_order/aaa");
     },
     //查看本地存储是否存有购物车数据

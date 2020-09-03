@@ -102,7 +102,7 @@ export default {
     //获取本地存储中购物车的数据
     this.getLocalShopCart();
     //如果用户存在。则网络请求shopCart数据
-    if (this.$store.state.userInfo && this.shopCart) {
+    if (this.$store.state.userInfo) {
       // this.getShopCart();
       this.$store.dispatch("getShopCart", this.$store.state.userInfo.id);
     }
@@ -208,6 +208,18 @@ export default {
         }
       });
       // this.$router.push("/confirm_order/" + JSON.stringify(arr));
+
+
+      //把购物车提交到订单内的数据 存储到本地中
+      let data = window.localStorage.getItem(this.$store.state.localData);
+      data =
+        data != undefined && data != null && data != ""
+          ? JSON.parse(data)
+          : {};
+      //为 本地存储中添加 payMentData ， 值为提交到confirmOrder中的数据
+      data.payMentData = this.$store.state.payMentData
+      //存储
+      window.localStorage.setItem(this.$store.state.localData,JSON.stringify(data))
       this.$router.push("/confirm_order/aaa");
     },
     //在页面离开的时候。调用方法，修改数据库的值
@@ -230,8 +242,11 @@ export default {
             data.num = shopCart[i][j].num;
             data.ischeck = shopCart[i][j].ischeck;
             data.norm = shopCart[i][j].norm;
+            data.takeover_addr = shopCart[i][j].takeover_addr;
             //执行网络请求
-            UpdataShopCart(data);
+            UpdataShopCart(data).then(res=>{
+              console.log(res);
+            });
           }
         }
       }

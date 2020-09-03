@@ -144,6 +144,7 @@
         <div>
           <input type="button" value="提交" />
         </div>
+        {{shop}}
       </div>
 
       <!-- 用户登陆后 订单没有详细配送地址的 遮罩层 -->
@@ -182,6 +183,7 @@ import Scroll from "components/contents/scroll/Scroll";
 import { create_order, create_details_order } from "network/order";
 //获取用户地址的 网络请求
 import { get_user_address } from "network/address";
+import { UpdataShopCart } from "network/shopCart";
 export default {
   name: "ConfirmOrder",
   components: {
@@ -229,7 +231,7 @@ export default {
             if (res.code != 200) {
               //失败的话 给用于一个提示。当用户点击确认的时候。跳转页面
               this.$router.push("/profile");
-              return;
+              return console.log("下单失败");
             }
             //提交订单成功后。把默认的配送地址取回来。放到购物车页面
             this.$store.state.ShoppingAddress = this.$store.state.userInfo.defaddr;
@@ -238,22 +240,37 @@ export default {
         }
         //从details进入确认订单
         if (this.$store.state.areacodeHistory.indexOf("/details") != -1) {
-          //取出传递过来的数据
-          this.orderData.goods_id = this.shop[0].goods_id;
-          this.orderData.num = this.shop[0].num;
-          this.orderData.norm = this.shop[0].norm;
+          //取出传递过来的数据   只能有1条数据  可能会有组合商品
+          this.shop.forEach((item) => {
+            this.orderData.goods_id = item.goods_id;
+            this.orderData.num = item.num;
+            this.orderData.norm = item.norm;
+          });
           create_details_order(this.orderData).then((res) => {
             console.log(res);
             if (res.code != 200) {
               //失败的话 给用于一个提示。当用户点击确认的时候。跳转页面
               this.$router.push("/profile");
-              return;
+              return console.log("下单失败");
             }
             //提交订单成功后。把默认的配送地址取回来。放到购物车页面
             this.$store.state.ShoppingAddress = this.$store.state.userInfo.defaddr;
             this.$router.push("/payment/" + res.data.order_id);
           });
         }
+        this.$store.state.payMentData = null;
+        //清除本地存储中 存放的确认订单数据
+        let data = window.localStorage.getItem(this.localData);
+        data =
+          data != undefined && data != null && data != ""
+            ? JSON.parse(data)
+            : {};
+        //如果data.payMentData  不为Null
+        //通过三目运算判断  data.payMentData 是否存在。存在就删除 否则什么都不做
+        data.payMentData != undefined && data.payMentData != null
+          ? delete data["payMentData"]
+          : null;
+        window.localStorage.setItem(this.localData, JSON.stringify(data));
       }
     },
     //替换地址遮罩层显示后的确认按钮事件
@@ -301,12 +318,20 @@ export default {
         //从购物车页面过来后。如果用户登录了。我们就查看一下 传过来的数据中，是否有配送地址不完整的。
         //详细地址
 
-        for (let i = 0; i < this.shop.length; i++) {
+        for (let i = 0, temp = true; i < this.shop.length; i++) {
           let addr = this.shop[i].takeover_addr.split(",");
-          if (addr[3] == "") {
+          if (addr[3] == "" && temp) {
             this.showReplAddr();
-            break; // break出错
+            temp = false; // 作用是为了让当前的if 只执行一次
           }
+          //修改确认订单页面 购买商品的配送地址
+          this.UpdataShopCart({
+            id: this.shop[i].id,
+            num: this.shop[i].num,
+            norm: this.shop[i].norm,
+            ischeck: 1,
+            takeover_addr: this.address.takeover_addr,
+          });
         }
       }
       if (this.$store.state.areacodeHistory.indexOf("/details") != -1) {
@@ -331,6 +356,13 @@ export default {
         }
       }
     },
+    //修改默认配送地址
+    UpdataShopCart(data) {
+      // 离开购物车页面的时候，修改购物车的网络请求需要添加字段
+      UpdataShopCart(data).then((res) => {
+        console.log(res);
+      });
+    },
   },
   computed: {
     //计算
@@ -338,14 +370,29 @@ export default {
       return this.$store.state.ShoppingAddress;
     },
     //获取提交的购物车数据
-    shop(){
-      return this.$store.state.payMentData
-    }
+    shop() {
+      let data =
+        this.$store.state.payMentData != null
+          ? this.$store.state.payMentData
+          : JSON.parse(window.localStorage.getItem(this.localData)).payMentData;
+      return data;
+    },
+    localData() {
+      return this.$store.state.localData;
+    },
   },
   created() {
+    if (
+      window.localStorage.getItem(this.localData) == undefined ||
+      window.localStorage.getItem(this.localData) == null ||
+      window.localStorage.getItem(this.localData) == ""
+    ) {
+      this.$router.push("/home");
+    }
+    //传递数据到确认订单页面的时候，如果数据都是依靠地址栏路径进行传递的话，一件商品还可以。2件甚至多见商品时。确认订单页面容易出现空白页面。原因是由于地址栏的地址过长，有写数据被修剪，导致读取不出传送过来的数据值，
 
     //看看是从那个页面跳转的   确认订单页面
-    this.sourcePage()
+    this.sourcePage();
   },
 
   filters: {

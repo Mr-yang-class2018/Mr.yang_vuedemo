@@ -38,7 +38,7 @@ const state = {
   loginHistory:'/home',     //记录从那个页面跳转到登录的。
   configOrderHistory:null,  //记录离开确认订单时候的路由地址
   allAddress:null,   //  记录所有的用户地址
-  payMentData:null   //存储购物车提交的订单
+  payMentData:null   //存储购物车/details提交的订单 
 }
 const x = new Vuex.Store({
   state,      //状态管理数据

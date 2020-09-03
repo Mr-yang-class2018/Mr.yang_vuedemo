@@ -108,6 +108,7 @@ export class Evaluate {
 
 
 
+//获取details提交到确认订单页面的数据 ---- 可以修改的值不在此处获取 例如   num  norm  addr
 export class orderConfirmData {
     constructor(goods,shops) {
         //商品id
