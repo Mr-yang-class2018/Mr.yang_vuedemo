@@ -2,8 +2,33 @@
 </style>
 <template>
   <div class="Store">
-    这是店铺模板页面。还没有做修饰。
-    <hr />页面需要请求接口。返回店铺数据
+    <div class='head'>
+      <div>
+        这是店铺模板页面。还没有做修饰。
+        <img src="" alt="店铺logo" class='logo'>
+        <div class='title'>店铺名</div>
+        <button>收藏</button>
+        <button title='更多'>...</button>
+      </div>
+      <div class='nav'>
+        <button title='有个点击事件，点击可以跳转到搜索页面'> <span>搜索图标</span>   搜索</button>
+        <ul>
+          <router-link tag='li' to="/page1">首页1</router-link>
+          <router-link tag='li' to="/page3">首页3</router-link>
+          <router-link tag='li' to="/page4">首页4</router-link>
+          <router-link tag='li' to="/page5">首页5</router-link>
+          <router-link tag='li' to="/page7">首页7</router-link>
+          <router-link tag='li' to="/page9">首页9</router-link>
+        </ul>
+      </div>
+      <router-view>
+        我不会写！
+      </router-view>
+    </div>
+
+      
+
+
   </div>
 </template>
 
